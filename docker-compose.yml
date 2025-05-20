@@ -1,0 +1,55 @@
+services:
+  fastapi:
+    build:
+      context: ./backend/app
+      dockerfile: Dockerfile
+    container_name: rag_fastapi
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/app:/app
+      - shared_volume:/app/shared_data
+    depends_on:
+      - chromadb
+      - ollama
+    environment:
+      - CHROMADB_HOST=chromadb
+      - CHROMADB_PORT=8000
+      - OLLAMA_HOST=ollama
+      - OLLAMA_PORT=11434
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    tty: true
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+    
+  flask:
+    build:
+      context: ./frontend/app
+      dockerfile: Dockerfile
+    volumes:
+      - shared_volume:/app/shared_data
+    depends_on:
+      - fastapi
+    ports:
+      - "5000:5000"
+volumes:
+  chroma_data:
+  ollama_data:
+  shared_volume:
