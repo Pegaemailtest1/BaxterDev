@@ -18,7 +18,36 @@
         │
         └── docker-compose.yml
 ========================================
-3. Run It All
+3. Install docker compose
+    pip install docker-compose
+==============================
+
+4. Add environment variable
+
+        Add it to your system PATH
+        Check if it's installed:
+        Look in:
+        C:\Program Files\Docker\Docker\resources\bin
+        You should see a docker-compose.exe.
+
+        Add that folder to your system PATH:
+
+        Press Windows Key → Search Environment Variables
+
+        Click Edit the system environment variables
+
+        In the System Properties window, click Environment Variables
+
+        Under System Variables, select Path → click Edit
+
+        Click New, and add:
+        C:\Program Files\Docker\Docker\resources\bin
+        Click OK and restart VS Code
+
+        Reopen your terminal and run:
+        docker-compose version
+========================================
+4. Run It All
     docker-compose up --build
 =========================================
 
@@ -35,9 +64,15 @@ Test Ollama is Running:
         Foundation Model RAG Based search:
             docker exec -it ollama ollama pull llama3
 
+=================================
+Rebuilds your images fresh, applying the .dockerignore changes.
+    docker-compose build --no-cache
+    docker-compose up -d
 
+    docker-compose build --no-cache fastapi
+    docker-compose up -d
+=================================
 
-==========================
 Docker Commands for AWS EC2 instance:
 ==========================
 1. Update the System:

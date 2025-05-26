@@ -20,6 +20,7 @@ langdetect
 openpyxl
 langsmith
 pyyaml
-nltk
-numpy==1.26.4
 scikit-learn
+# openai
+# transformers
+# torch

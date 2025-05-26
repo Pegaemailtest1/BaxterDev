@@ -40,6 +40,11 @@ MAX_RESULTS = config["llm"]["max_results"]
 TEMPERATURE = config["llm"]["temperature"]
 MAX_TOKENS = config["llm"]["max_tokens"]
 
+OpenAI_FM_MODEL = config["openai"]["api_key"]
+OpenAI_Model = config["openai"]["model"]
+OpenAI_base_url = config["openai"]["base_url"]
+
+
 UPLOAD_FOLDER = config["data"]["upload_folder"]
 ARCHIVE_FOLDER = config["data"]["archive_folder"]
 INPUT_TEMPLATE_FOLDER = config["data"]["input_template_folder"]
@@ -92,7 +97,7 @@ def file_vectorization(request: FolderPathRequest):
     folder_path = request.folder_path
     logging.info(f"folder_path:{folder_path}")
     
-    delete_collection(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME)
+    #delete_collection(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME)
     #logging.info(f"Collection deleted successfully")
     
     documents = load_documents(folder_path)    

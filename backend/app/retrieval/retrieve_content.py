@@ -11,7 +11,15 @@ from utils import load_constants
 import os
 from langsmith import Client
 
+from utils import load_constants
 config = load_constants()
+
+
+config = load_constants()
+
+OpenAI_FM_MODEL = config["openai"]["api_key"]
+OpenAI_Model = config["openai"]["model"]
+OpenAI_base_url = config["openai"]["base_url"]
 
 # Set LangSmith env variables
 langsmith_config = config.get("langsmith", {})
@@ -64,13 +72,20 @@ def ask_llama3(prompt, OLLAMA_URL, FM_MODEL,temperature, max_tokens):
     
     if '{"response": ["No Trace"]}' in prompt:
         return '{"response": ["No Trace"]}'
+    
+    if '{"response": "No Trace"}' in prompt:
+        return '{"response": "No Trace"}'
         
     response = requests.post(
         f"{OLLAMA_URL}/api/generate",
         json={"model": FM_MODEL, "prompt": prompt, "temperature": temperature, "num_predict": max_tokens}
     )
+    if response.status_code == 404:
+        print(f"404 Error: {response.text}")
+        raise Exception(f"Endpoint not found at {OLLAMA_URL}/api/generate")
+
     response.raise_for_status()
-    
+        
     full_response = ""
     for line in response.iter_lines(decode_unicode=True):
         if line:

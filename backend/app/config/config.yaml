@@ -17,9 +17,14 @@ embedding:
 
 llm:
   fm_model: "llama3"
-  max_results: 10
+  max_results: 5
   temperature: 0.4
   max_tokens: 2048
+
+openai:
+  api_key: "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"
+  model: "gpt-4o"
+  base_url: "https://api.openai.com/v1"
 
 langsmith:
   enable_tracing: true
@@ -29,3 +34,7 @@ langsmith:
   
 logging:
   log_level: "INFO"
+
+environment:
+  - MODEL_NAME="papluca/xlm-roberta-base-language-detection"
+  - HF_TOKEN="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"

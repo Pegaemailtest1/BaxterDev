@@ -22,7 +22,7 @@ def questions():
                 "dictionary_element":"Date"
             },
             {
-                "question":"Extract the intended purpose from the Label IFU (0719004306) document for product {product_code}  under Column 1 section",
+                "question":"Extract the intended purpose from the Label IFU (0719004306) document for product {product_code} under Column 1 section",
                 "column":"4",
                 "row":"13",
                 "dictionary_element":"Intended Use"
@@ -40,37 +40,37 @@ def questions():
                 "dictionary_element":"Intended Use"
             },
             {
-                "question":"Extract the Indication for Use from the Label IFU (0719004306) document for product {product_code} under Indication for Use section.",
+                "question":"Extract the Indication for Use from the Label IFU (0719004306) document for product {product_code} under Column 1 section.",
                 "column":"4",
                 "row":"14",
                 "dictionary_element":"Indication for Use"
             },
             {
-                "question":"Extract the Indication for Use from the label Pouch (0736003737) document for product {product_code} under Indication for Use section.",
+                "question":"Extract the Indication for Use from the label Pouch (0736003737) document for product {product_code}.",
                 "column":"6",
                 "row":"14",
                 "dictionary_element":"Indication for Use"
             },
             {
-                "question":"Extract the Indication for Use from the Label Carton (0738002356) document for product {product_code} under Indication for Use section.",
+                "question":"Extract the Indication for Use from the Label Carton (0738002356) document for product {product_code}.",
                 "column":"8",
                 "row":"14",
                 "dictionary_element":"Indication for Use"
             },
             {
-                "question":"Extract the Contraindications from the Label IFU (0719004306) document for product {product_code} under Contraindications section.",
+                "question":"Extract the Contraindications from the Label IFU (0719004306) document for product {product_code} under Column 1 section.",
                 "column":"4",
                 "row":"15",
                 "dictionary_element":"Contraindications"
             },
             {
-                "question":"Extract the Contraindications from the label Pouch (0736003737) document for product {product_code} under Contraindications section.",
+                "question":"Extract the Contraindications from the label Pouch (0736003737) document for product {product_code}.",
                 "column":"6",
                 "row":"15",
                 "dictionary_element":"Contraindications"
             },
             {
-                "question":"Extract the Contraindications from the Label Carton (0738002356) document for product {product_code} under Contraindications section.",
+                "question":"Extract the Contraindications from the Label Carton (0738002356) document for product {product_code}.",
                 "column":"8",
                 "row":"15",
                 "dictionary_element":"Contraindications"

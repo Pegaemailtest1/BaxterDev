@@ -5,7 +5,7 @@ import json
 import logging
 import sys
 from langchain.globals import set_llm_cache
-from langchain.cache import InMemoryCache
+from langchain_community.cache import InMemoryCache
 from collections import defaultdict
 from openpyxl.utils import get_column_letter
 from openpyxl.cell.cell import Cell
@@ -44,15 +44,6 @@ def extract_response_array(llama_response):
         json_start = llama_response.index('{')
         json_data = llama_response[json_start:]
         logging.info(f"json data before: {json_data}")
-        # Fix common LLM formatting issues
-        # json_data = json_data.replace('""', '"')   # remove double quotes
-        # json_data = json_data.replace('\\"', '"')
-        # json_data = json_data.replace("\n", "")
-        # json_data = json_data.replace('\\n\\n', "")
-        # json_data = json_data.replace('\\"\\"', '"')
-        # json_data = json_data.replace('\n\"', '"')
-        # json_data = json_data.strip()
-        
         # Parse JSON
         data = json.loads(json_data)
         logging.info(f"json data: {data}")
@@ -94,6 +85,14 @@ def copy_row_style(template_row, target_row):
             target_cell.alignment = copy(template_cell.alignment)
             target_cell.number_format = copy(template_cell.number_format)
 
+    # Copy row height
+    target_row_idx = target_row[0].row
+    template_row_idx = template_row[0].row
+    target_ws = target_row[0].parent
+    template_ws = template_row[0].parent
+
+    target_ws.row_dimensions[target_row_idx].height = template_ws.row_dimensions[template_row_idx].height
+
 def apply_styles_by_first_column_match(input_template_path, output_file_path, start_row):
     # Load workbooks
     template_wb = openpyxl.load_workbook(input_template_path)
@@ -124,6 +123,8 @@ def apply_styles_by_first_column_match(input_template_path, output_file_path, st
 def form_dict_input(input_type, input_value, column, row, repeat):
     if isinstance(input_value, list):
         for item in input_value:
+            if item.strip().lower() == "no trace":
+                continue  # Skip individual "No Trace" items
             found = False
             for entry in dict_data[input_type]:
                 if entry["value"] == item:

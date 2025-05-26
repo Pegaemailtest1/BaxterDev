@@ -65,16 +65,12 @@ def generate_prompt_template(context, query):
             {% endif %}
         {% elif field.lower() == "date" %}
             {% if date and date|length == 7 %}
+                {# Safely extract parts if length is correct (e.g., 04DEC24) #}
                 {% set day = date[0:2] %}
                 {% set month = date[2:5].upper() %}
                 {% set year_suffix = date[5:] %}
                 {% if year_suffix.isdigit() %}
-                    {% set year_number = year_suffix|int %}
-                    {% if year_number < 50 %}
-                        {% set year = "20" ~ "%02d"|format(year_number) %}
-                    {% else %}
-                        {% set year = "19" ~ "%02d"|format(year_number) %}
-                    {% endif %}
+                    {% set year = "20" ~ year_suffix %}
                     {% set value = day ~ "-" ~ month ~ "-" ~ year %}
                 {% else %}
                     {% set value = "Not found" %}
@@ -143,31 +139,25 @@ def generate_prompt_template_for_intentended(context, query):
 
 def generate_prompt_template_for_indication_for_use(context, query):
 
-    if not context:
-        response = '{"response": "No Trace"}'
-        return response
-    
     fields = extract_components(context, query)
 
     # Jinja template string
     template_str = """
-        You are a helpful assistant that extracts specific information from a set of documents.
+        Extract the exact English value for the field "{{ field }}" from the document.
 
         Context:
         {{ context }}
 
-        Task:
-        Extract the "{{ field }}" field from the document.
+        Instructions:
+        - Extract the exact value for "{{ field }}", in English only. Ignore non-English content.
+        - If the value spans multiple lines, combine them into one.
+        - Return only the exact match, no approximations or partial matches.
+        - If not found, return: "No Trace".
 
-        Please apply the following formatting rules:
-        - Extract the complete English sentence or paragraph that contains "{{ field }}".
-        - If it's split across lines or segments, combine them. 
-        - Ignore non-English text (e.g., German, Spanish). If not found, return: "No Trace".
-        
-        ⛔ Do not include any additional text or explanation.
-        ✅ Respond ONLY with this exact JSON format:
+        ⛔ Do not include extra explanation.
+        ✅ Respond ONLY with this JSON format:
         {
-        "response": "<your extracted sentence here>"
+        "response": "<extracted value>"
         }
         """
 
@@ -180,31 +170,26 @@ def generate_prompt_template_for_indication_for_use(context, query):
 
 def generate_prompt_template_for_contraindications(context, query):
 
-    if not context:
-        response = '{"response": "No Trace"}'
-        return response
-    
     fields = extract_components(context, query)
 
     # Jinja template string
     template_str = """
-        You are a helpful assistant that extracts specific information from a set of documents.
+        Extract the exact English value for the field "{{ field }}" from the document.
 
         Context:
         {{ context }}
 
-        Task:
-        Extract the "{{ field }}" field from the document.
+        Instructions:
+        - Extract the exact value associated with the field "{{ field }}".
+        - The extracted text must be entirely in English. Do not return content written in any other language (e.g., Italian, German, Spanish).
+        - If the value spans multiple lines, combine them into one.
+        - Do not translate or guess non-English values — skip them entirely.
+        - If the English value for "{{ field }}" is not found, or only appears in another language, return exactly: "No Trace".
 
-        Please apply the following formatting rules:
-        - Extract the complete English sentence or paragraph that contains "{{ field }}".
-        - If it's split across lines or segments, combine them. 
-        - Ignore non-English text (e.g., German, Spanish). If not found, return: "No Trace".
-        
-        ⛔ Do not include any additional text or explanation.
-        ✅ Respond ONLY with this exact JSON format:
+        ⛔ Do not include any additional explanation or formatting.
+        ✅ Respond ONLY with this JSON format:
         {
-        "response": "<your extracted sentence here>"
+        "response": "<extracted value or No Trace>"
         }
         """
 
@@ -227,7 +212,7 @@ def generate_prompt_template_for_list(context, query):
         {{ context }}
 
         Task:
-        Extract all the medical warnings from the context.
+        Extract all English bullet points listed under the "{{ field }}" section of the document.
 
         Instructions:
         - Bullet points begin with the symbol "•" and may span multiple lines — include the full text as a single item.
