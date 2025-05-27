@@ -227,7 +227,7 @@ def generate_prompt_template_for_list(context, query):
         {{ context }}
 
         Task:
-        Extract all the medical warnings from the context.
+        Extract all English bullet points listed under the "{{ field }}" section of the document.
 
         Instructions:
         - Bullet points begin with the symbol "•" and may span multiple lines — include the full text as a single item.
@@ -259,13 +259,83 @@ def generate_prompt_template_for_list(context, query):
     return final_prompt
 
 
+def generate_prompt_template_for_context_list(context, query):
+
+    if not context:
+        return '{"response": ["No Trace"]}'
+    
+    fields = extract_components(context, query)
+   
+    template_str = """
+        Context:
+        {{ context }}
+
+        Task:
+        Extract all medical warnings from the context.
+
+        Instructions:
+        - Bullet points begin with the symbol "•" and may span multiple lines — include the full text as a single item.
+        - Join multi-line bullets into one complete sentence.
+        - A medical warning refers to any instruction related to storage, handling, disposal, usage intervals, or precautions for safe use of the product.
+        - Include any bullet point that addresses how the product should be used, stored, replaced, or discarded.
+        - Do NOT include bullet points that only mention material composition, manufacturing claims, or glossary references.
+        - Each bullet point must end with a period.
+        - If no applicable medical warnings are found, return: ["No Trace"].
+
+        Output Format:
+        Return a JSON object structured as:
+        {
+            "response": [
+                "First medical warning.",
+                "Second medical warning.",
+                ...
+            ]
+        }
+
+        ⛔ Do not include bullet characters ("•") in the final output.
+        ⛔ Do not include extra explanation or metadata.
+        ✅ Only return the exact JSON object as specified.
+        """
+    # Render template
+    template = Template(template_str)
+    final_prompt = template.render(fields)
+
+    return final_prompt
+
+
 def generate_default_prompt_template(context, query):
-    return f"""You are an intelligent assistant. Use the following context to answer the user's question.
+    
+    fields = extract_components(context, query)
+   
+    template_str = """
+        Context:
+        {{ context }}
 
-            Context:
-            {context}
+        Task:
+        {{ query }}
 
-            {query}"""
+        Instructions:
+        - Extract only the text that appears under "{{ query }}" in the context.
+        - Return the exact text block as-is, preserving punctuation and paragraph breaks.
+        - If no matching section is found, return: ["No Trace"].
+
+        Output Format:
+        Return a JSON object structured as:
+        {
+            "response": [
+                "Extracted text block here."
+            ]
+        }
+
+        ⛔ Do not include extra explanation or metadata.
+        ✅ Only return the exact JSON object as specified.
+        """
+
+    # Render template
+    template = Template(template_str)
+    final_prompt = template.render(fields)
+
+    return final_prompt
 
 def select_prompt_template(context, query):
     
@@ -286,6 +356,8 @@ def select_prompt_template(context, query):
         return generate_prompt_template_for_contraindications(context, query)
     elif "part number" in field:
         return generate_prompt_template(context, query)
+    elif field in ("all medical warnings", "all medical cautions", "all medical claims"):
+        return generate_prompt_template_for_context_list(context, query)
     else:
         return generate_default_prompt_template(context, query)
     
