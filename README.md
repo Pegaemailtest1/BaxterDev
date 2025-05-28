@@ -65,3 +65,7 @@ Test Ollama is Running:
             docker exec -it ollama ollama pull llama3
 
 =================================
+5. Access flask website
+    http://<domain>:5000
+=================================
+
