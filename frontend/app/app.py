@@ -25,6 +25,9 @@ UPLOAD_INPUT_TEMPLATE_FOLDER = 'shared_data/input_templates/'
 os.makedirs(UPLOAD_INPUT_TEMPLATE_FOLDER, exist_ok=True)
 app.config['UPLOAD_INPUT_TEMPLATE_FOLDER'] = UPLOAD_INPUT_TEMPLATE_FOLDER
 
+DOWNLOAD_TEMPLATE_FOLDER = 'shared_data/output_templates/'
+app.config['DOWNLOAD_TEMPLATE_FOLDER'] = DOWNLOAD_TEMPLATE_FOLDER
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
@@ -40,16 +43,21 @@ def index():
         answer = r.json().get('answer', '')
     return render_template('index.html', answer=answer)
 
-@app.route("/dashboard")
-def dashboard():
-    return render_template("index.html")
+@app.route("/overview")
+def overview():
+    return render_template("overview.html")
 
 @app.route('/reports')
 def reports():
-    #os.makedirs(UPLOAD_INPUT_TEMPLATE_FOLDER, exist_ok=True)
-    files = os.listdir(UPLOAD_INPUT_TEMPLATE_FOLDER)
-    return render_template("reports.html", files=files, fastapi_url="http://localhost:8001")
-    #return render_template('reports.html')
+    input_files = os.listdir(UPLOAD_INPUT_TEMPLATE_FOLDER)
+    output_files = os.listdir(DOWNLOAD_TEMPLATE_FOLDER)
+    
+    return render_template(
+        "reports.html",
+        input_files=input_files,
+        output_files=output_files,
+        fastapi_url="http://localhost:8001"
+    )
 
 @app.route('/chatbot')
 def chatbot():

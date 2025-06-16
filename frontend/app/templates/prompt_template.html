@@ -9,17 +9,17 @@
 
 <body>
 
-  <nav>
-    <ul>
-      
-      <li><a href="{{ url_for('index') }}">Home</a></li>
-      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li> 
-      <li><a href="{{ url_for('upload') }}">Upload</a></li>
-      <li><a href="{{ url_for('reports') }}">Reports</a></li>
-      <li><a href="{{ url_for('chatbot') }}">Chat</a></li>
-    </ul>
-</nav>
-
+ <header class="header-container">
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('overview') }}">Overview</a></li> 
+        <li><a href="{{ url_for('upload') }}">Upload</a></li>
+        <li><a href="{{ url_for('reports') }}">Reports</a></li>
+        <li><a href="{{ url_for('chatbot') }}">Chat</a></li>
+      </ul>
+    </nav>
+  </header>
 
   <div class="container">
     <div class="chat-box">

@@ -8,25 +8,37 @@
 </head>
 
 <body>
-
-  <nav>
-    <ul>
+  <header class="header-container">
+    <nav>
+      <ul>
         <li><a href="{{ url_for('index') }}">Home</a></li>
-        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li> 
+        <li><a href="{{ url_for('overview') }}">Overview</a></li> 
         <li><a href="{{ url_for('upload') }}">Upload</a></li>
         <li><a href="{{ url_for('reports') }}">Reports</a></li>
         <li><a href="{{ url_for('chatbot') }}">Chat</a></li>
-    </ul>
-  </nav>
+      </ul>
+    </nav>
+  </header>
 
   <div class="container">
     <div class="report-box">
-      <h2>Downloadable Files</h2>
+      <h2>Input Template Files - Generate output</h2>
       <ul class="report-item">
-        {% for file in files %}
+        {% for file in input_files %}
           <li>
             {{ file }} -
             <a href="{{ fastapi_url }}/download/{{ file }}">Download</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="report-box">
+      <h2>Downloadable Files</h2>
+      <ul class="report-item">
+        {% for file in output_files %}
+          <li>
+            {{ file }} -
+            <a href="{{ fastapi_url }}/downloaded_file/{{ file }}">Download</a>
           </li>
         {% endfor %}
       </ul>
