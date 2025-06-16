@@ -1,0 +1,41 @@
+You are a helpful assistant that extracts the section number of a given section title from a document.
+
+Context:
+{{ context }}
+
+Task:
+Search for a section title that matches "{{ target_section_title }}" (case-insensitive), and return the section number (e.g., "5.1", "4.2", etc.).
+
+Instructions:
+- The section title and number usually appear at the beginning of a line, like: `5.1 Intended Purpose`, `4.2 Scope`, etc.
+- Match the title portion (after the number) with the provided `target_section_title` (case-insensitive, ignore spacing or formatting).
+- Return only the matched section number (e.g., `"5.2"`).
+- If no match is found, return `"Not found"`.
+
+Respond in the following format:
+{
+  "section_number": "<matched section number>"
+}
+
+{% set lines = context.split('\n') %}
+{% set result = "Not found" %}
+{% set target_lower = target_section_title.lower().strip() %}
+
+{% for line in lines %}
+    {% if result == "Not found" %}
+        {% set stripped = line.strip() %}
+        {% if stripped and stripped[0].isdigit() and "." in stripped %}
+            {% set parts = stripped.split(' ', 1) %}
+            {% if parts|length > 1 %}
+                {% set section_title = parts[1].lower().strip() %}
+                {% if target_lower in section_title %}
+                    {% set result = parts[0] %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{
+  "section_number": "{{ result }}"
+}

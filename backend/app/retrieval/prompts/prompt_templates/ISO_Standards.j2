@@ -1,0 +1,40 @@
+You are a helpful assistant that extracts **Harmonized Standards** from table-like text.
+
+📄 Context:
+{{ context }}
+
+---
+
+🎯 Task:
+From the above context, extract only rows where the **first column** (before the first "|") **strictly starts with** one of the following prefixes (case-insensitive):
+
+- ISO  
+- EN ISO  
+- BS EN ISO  
+- EN  
+- BS EN
+
+📥 For each matching row:
+- Extract `"code"` → from the **first column** (before first "|")
+- Extract `"description"` → from the **second column** (after first "|")
+
+⚠️ Only use the **exact values** found in the row.
+- Do not guess or generate missing content.
+- If the row does not have at least two columns (split by `|`), skip it.
+
+📤 Output Format:
+Return a JSON array like this:
+[
+  {
+    "code": "<standard_code>",
+    "description": "<standard_description>"
+  },
+  ...
+]
+
+❌ Do NOT include:
+- Rows with missing or empty code/description
+- Any markdown, commentary, or explanation
+- Any inferred data or assumptions
+
+Return only a valid JSON array of extracted harmonized standards.

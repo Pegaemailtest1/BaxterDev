@@ -1,0 +1,56 @@
+#default prompts
+description: description.j2
+list: list.j2
+medical_context_list: medical_context_list.j2
+part_number: part_number.j2
+ISO_standards: ISO_Standards.j2
+default: default.j2
+
+#Label prompts
+part_number_label: part_number_label.j2
+caution_label: caution_label.j2
+claim_label: claim_label.j2
+contraindications_label: contraindications_label.j2
+indication_for_use_label: indication_for_use_label.j2
+intended_purpose_label: intended_purpose_label.j2
+warning_label: warning_label.j2
+
+#CER prompts
+document_id_and_revision_CER: document_id_and_revision_CER.j2
+issued_date_CER: issued_date_CER.j2
+section_number_CER: section_number_CER.j2
+intended_purpose_CER: intended_purpose_CER.j2
+indication_for_use_CER: indication_for_use_CER.j2
+contraindications_CER: contraindications_CER.j2
+
+#PRD prompts
+document_id_and_revision_PRD: document_id_and_revision_PRD.j2
+issued_date_PRD: issued_date_PRD.j2
+section_number_PRD: section_number_PRD.j2
+intended_purpose_PRD: intended_purpose_PRD.j2
+indication_for_use_PRD: indication_for_use_PRD.j2
+contraindications_PRD: contraindications_PRD.j2
+
+#Risk Management prompts
+document_id_and_revision_Risk: document_id_and_revision_Risk.j2
+issued_date_Risk: issued_date_Risk.j2
+section_number_Risk: section_number_Risk.j2
+intended_purpose_Risk: intended_purpose_Risk.j2
+indication_for_use_Risk: indication_for_use_Risk.j2
+contraindications_Risk: contraindications_Risk.j2
+
+#Design Validation prompts
+document_id_DesignValidation: document_id_DesignValidation.j2
+issued_date_DesignValidation: issued_date_DesignValidation.j2
+revision_DesignValidation: revision_DesignValidation.j2
+intended_purpose_DesignValidation: intended_purpose_DesignValidation.j2
+indication_for_use_DesignValidation: indication_for_use_DesignValidation.j2
+contraindications_DesignValidation: contraindications_DesignValidation.j2
+
+#Tracematrix prompts
+document_id_TraceMatrix: document_id_TraceMatrix.j2
+issued_date_TraceMatrix: issued_date_TraceMatrix.j2
+revision_TraceMatrix: revision_TraceMatrix.j2
+intended_purpose_TraceMatrix: intended_purpose_TraceMatrix.j2
+indication_for_use_TraceMatrix: indication_for_use_TraceMatrix.j2
+contraindications_TraceMatrix: contraindications_TraceMatrix.j2

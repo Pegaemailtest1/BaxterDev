@@ -114,15 +114,6 @@ def ocr_from_vector_path(vector_path, width=600, height=200, scale=1):
         draw.rectangle([x, y, x + scale - 1, y + scale - 1], fill=0)
     return pytesseract.image_to_string(img).strip()
 
-def normalize_table_chunk(raw_text):
-    lines = raw_text.strip().split("\n")
-    normalized_lines = []
-    for line in lines:
-        cols = [col.strip() for col in line.split("|")]
-        if len(cols) >= 2:
-            normalized_lines.append(f"{cols[0]} | {cols[1]}")
-    return "\n".join(normalized_lines)
-    
 def retrieve_collection_data(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME, EMBED_MODEL, query_text, max_results, FM_MODEL, OLLAMA_URL, temperature, max_tokens):
     client = connect_chromadb(CHROMA_HOST, CHROMA_PORT)
     collection = get_chromadb_collection(client, COLLECTION_NAME)
@@ -151,11 +142,14 @@ def retrieve_collection_data(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME, EMBED_MO
     results = collection.get(
         include=["documents", "metadatas"],
         where={
-            "$and": [
-                {"document_id": {"$eq": "BXU601670_MDR_CER,A"}},
-                {"type": {"$eq": "table"}}
-            ]
-        }
+                "$and": [{
+                    "source": {"$eq": "shared_data/uploads/Label/RMC4916_0719004306_IFU_LABEL.pdf"},
+                },
+                {
+                    "section": {"$ne": "Colour Reference:"}
+                }
+                ]               
+               }
     )
 
     # Step 2: Apply additional filtering (e.g., exclude a specific section)
@@ -182,7 +176,6 @@ def retrieve_collection_data(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME, EMBED_MO
         str(chunk).strip() for chunk in filtered_docs if str(chunk).strip()
     )
 
-    
     #logging.info(f"Filtered Query results: {filtered_chunks}")
     #logging.info(f"context: {context}")
 

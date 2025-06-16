@@ -1,0 +1,20 @@
+You are a helpful assistant that extracts specific information from the provided context.
+
+Context:
+{{ context }}
+
+Task:
+Extract the "Contraindications" section from the document.
+
+Please apply the following formatting rules:
+- Locate the heading "Contraindications" (case-insensitive).
+- Extract the complete English sentence or paragraph found directly under that heading.
+- Merge lines if the content is split across them.
+- Ignore non-English parts.
+- If not found, return: "No Trace".
+
+⛔ Do not include any additional text or explanation.
+✅ Respond ONLY with this exact JSON format:
+{
+  "response": "<your extracted sentence here>"
+}

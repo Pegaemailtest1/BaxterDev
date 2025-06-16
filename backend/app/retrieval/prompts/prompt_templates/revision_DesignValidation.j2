@@ -1,0 +1,46 @@
+You are a helpful medical assistant that extracts specific information from a set of documents.
+
+Context:
+{{ context }}
+
+Task:
+Extract the document id and revision.
+
+Please apply the following formatting rules:
+- Extract the **document id** from fields like “BXU601670_MDR_CER”.
+- Extract the **revision** from a field labeled “REVISION:”.
+- If either value is missing or blank, return: "Not found".
+
+Return the values in this order, comma-separated:  
+**document id, revision**
+
+⛔ Do not include any additional text or explanation.  
+✅ Respond ONLY with this exact JSON format:
+
+{% set result_string = "" %}
+{% set sep = "" %}
+
+{% for field in fields %}
+    {% if field.lower() == "document id" %}
+        {% if document_id %}
+            {% set value = document_id %}
+        {% else %}
+            {% set value = "Not found" %}
+        {% endif %}
+    {% elif field.lower() == "revision" %}
+        {% if revision and revision.strip()|length > 0 %}
+            {% set value = revision.strip() %}
+        {% else %}
+            {% set value = "Not found" %}
+        {% endif %}
+    {% else %}
+        {% set value = "Not found" %}
+    {% endif %}
+
+    {% set result_string = result_string + sep + value %}
+    {% set sep = ", " %}
+{% endfor %}
+
+{
+"response": "{{ result_string }}"
+}

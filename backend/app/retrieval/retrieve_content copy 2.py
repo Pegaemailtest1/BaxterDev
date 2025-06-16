@@ -114,15 +114,6 @@ def ocr_from_vector_path(vector_path, width=600, height=200, scale=1):
         draw.rectangle([x, y, x + scale - 1, y + scale - 1], fill=0)
     return pytesseract.image_to_string(img).strip()
 
-def normalize_table_chunk(raw_text):
-    lines = raw_text.strip().split("\n")
-    normalized_lines = []
-    for line in lines:
-        cols = [col.strip() for col in line.split("|")]
-        if len(cols) >= 2:
-            normalized_lines.append(f"{cols[0]} | {cols[1]}")
-    return "\n".join(normalized_lines)
-    
 def retrieve_collection_data(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME, EMBED_MODEL, query_text, max_results, FM_MODEL, OLLAMA_URL, temperature, max_tokens):
     client = connect_chromadb(CHROMA_HOST, CHROMA_PORT)
     collection = get_chromadb_collection(client, COLLECTION_NAME)
@@ -147,49 +138,52 @@ def retrieve_collection_data(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME, EMBED_MO
     if target_doc_id:
         meta_filter["source"] = {"$contains": target_doc_id}
 
-    # Step 1: Get using one filter (e.g., by source)
-    results = collection.get(
-        include=["documents", "metadatas"],
-        where={
-            "$and": [
-                {"document_id": {"$eq": "BXU601670_MDR_CER,A"}},
-                {"type": {"$eq": "table"}}
-            ]
-        }
-    )
+    # Perform query
+    if meta_filter:
+        results = collection.query(
+            query_texts=[question_text],
+            n_results=max_results,
+            where_document=meta_filter,
+            include=["documents", "metadatas"]
+        )
+    else:
+        results = collection.query(
+            query_texts=[question_text],
+            n_results=max_results,
+            include=["documents", "metadatas"]
+        )
 
-    # Step 2: Apply additional filtering (e.g., exclude a specific section)
-    # filtered_docs = []
-    # for doc, meta in zip(results["documents"], results["metadatas"]):
-    #     if meta.get("section") != "Colour Reference:":
-    #         filtered_docs.append((doc, meta))
-    #logging.info(f"Results: {results}")
-    documents = results.get("documents", [[]])
-    metadatas = results.get("metadatas", [[]])
+    documents = results.get("documents", [[]])[0]
+    metadatas = results.get("metadatas", [[]])[0]
 
 
-    # logging.info(f"documents:{documents}")
-    # logging.info(f"metadatas:{metadatas}")
+    logging.info(f"documents:{documents}")
+    logging.info(f"metadatas:{metadatas}")
     
 
     # Step 6: Filter based on metadata match
-    # filtered_chunks = []
-    filtered_docs = documents
+    filtered_chunks = []
+    if target_doc_id:
+        for doc, meta in zip(documents, metadatas):
+            source = meta.get("source", "")
+            filename = os.path.basename(source)
+            if target_doc_id in filename:
+                #logging.info(f"Matched document: {filename}")
+                filtered_chunks.append(doc)
+                logging.info(f"Filtered docs: {doc}")
+    else:
+        filtered_chunks = documents
 
-    logging.info(f"Filtered chunks: {filtered_docs}")
+    logging.info(f"Filtered chunks: {filtered_chunks}")
     # Step 7: Combine into final context
     context = "\n\n".join(
-        str(chunk).strip() for chunk in filtered_docs if str(chunk).strip()
+        str(chunk).strip() for chunk in filtered_chunks if str(chunk).strip()
     )
 
-    
     #logging.info(f"Filtered Query results: {filtered_chunks}")
-    #logging.info(f"context: {context}")
+    logging.info(f"context: {context}")
 
     prompt = select_prompt_template(context, query_text)
-
-    logging.info(f"Generated prompt: {prompt}")
-
     llama_response = ask_llama3(prompt, OLLAMA_URL, FM_MODEL, temperature, max_tokens)
 
     return llama_response

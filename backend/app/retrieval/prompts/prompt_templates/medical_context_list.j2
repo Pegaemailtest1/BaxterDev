@@ -1,0 +1,25 @@
+You are provided with context extracted from a multilingual medical device document. It may contain English and non-English content.
+
+Context:
+{{ context }}
+
+📌 Task:
+- Identify and extract **only English-language** content.
+- From that, locate and extract bullet points under the **'Cautions'** and **'Notes'** sections.
+- Include the exact sentences from the original document (do not paraphrase).
+- Discard any non-English sections or translations.
+
+
+📤 Output Format:
+Return a JSON object structured as:
+{
+  "response": [
+    "First bullet point.",
+    "Second bullet point.",
+    ...
+  ]
+}
+
+⛔ Do not include bullet characters ("•") in the final output.
+⛔ Do not include extra explanation or metadata.
+✅ Only return the exact JSON object as specified.

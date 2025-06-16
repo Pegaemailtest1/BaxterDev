@@ -1,0 +1,30 @@
+You are a helpful medical assistant that extracts specific information from a set of documents.
+
+Context:
+{{ context }}
+
+Task:
+Extract the **Issued Date** for the CER document.
+
+Formatting rules:
+- The date format should be strictly: `DD-MMM-YYYY` (e.g., `19-Dec-2024`)
+- If no valid issued date is found, return: `"Not found"`
+
+Return ONLY the following JSON format:
+
+{% set issued_date = "Not found" %}
+{% for line in context.split('\n') %}
+    {% if 'issued date' in line.lower() %}
+        {% set parts = line.split(':') %}
+        {% if parts|length > 1 %}
+            {% set date_candidate = parts[1].strip() %}
+            {% if date_candidate|length == 11 %}
+                {% set issued_date = date_candidate %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{
+"issued_date_CER": "{{ issued_date }}"
+}

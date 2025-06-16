@@ -1,5 +1,6 @@
 import openpyxl
-from .default_questions import questions, priority # Your function that returns question templates
+from retrieval.questions.question_loader import questions, priority
+from .process_question_templates import process_question_templates
 from .retrieve_content_template import retrieve_collection_data_template
 import json
 import logging
@@ -21,7 +22,7 @@ logging.basicConfig(
 
 dict_data = defaultdict(list)
 
-def query_llama(question, document_id, prompt_template, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens):
+def query_llama(question, document_id, prompt_template, full_document_search, where_filter, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens):
     
     llama_response =retrieve_collection_data_template(
         CHROMA_HOST,
@@ -31,6 +32,8 @@ def query_llama(question, document_id, prompt_template, OLLAMA_URL, EMBED_MODEL,
         question,
         document_id,
         prompt_template,
+        full_document_search,
+        where_filter,
         MAX_RESULTS,
         FM_MODEL,
         OLLAMA_URL,
@@ -122,11 +125,14 @@ def apply_styles_by_first_column_match(input_template_path, output_file_path, st
     output_wb.save(output_file_path)
 
 
-def form_dict_input(input_type, input_value, column, row, repeat):
+def form_dict_input(input_type, input_value, column, row, repeat, q_type):
+    if q_type == "group" and isinstance(input_value, list):
+        input_value = ", ".join(input_value)
+
     if isinstance(input_value, list):
         for item in input_value:
             if item.strip().lower() == "no trace":
-                continue  # Skip individual "No Trace" items
+                continue
             found = False
             for entry in dict_data[input_type]:
                 if entry["value"] == item:
@@ -138,24 +144,23 @@ def form_dict_input(input_type, input_value, column, row, repeat):
                     "value": item,
                     "column": [column]
                 })
+
     elif isinstance(input_value, str):
-        # This block is for descriptive fields like Intended Use, etc.
         new_entry = {
             "value": input_value,
             "column": column
         }
         if row is not None:
             new_entry["row"] = row
-           
-        if repeat is not None:
+        if repeat:
             new_entry["repeat"] = repeat
-
         dict_data[input_type].append(new_entry)
 
     else:
         print(f"Unsupported data type for {input_type}: {type(input_value)}")
 
-def generate_output_template(input_file_path, output_file_path, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens):
+
+def generate_set2_template(input_file_path, output_file_path, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens):
     # Set InMemoryCache as the global LLM cache
     set_llm_cache(InMemoryCache())
 
@@ -171,64 +176,25 @@ def generate_output_template(input_file_path, output_file_path, OLLAMA_URL, EMBE
         return
             
     # Step 2: Generate question templates
-    try:
-        question_templates = questions()
-        # logging.info(f"question templates:{question_templates}")
-        # Step 2d: Generate and write answers in columns C onward
-        for i, q_template in enumerate(question_templates["Questions"]):
-            question_text = q_template["question"].format(product_code=product_code)
-            # logging.info(f"question text:{question_text}")
+    process_question_templates(
+        questions_fn=questions,                      
+        product_code=product_code,                   
+        form_dict_input_fn=form_dict_input,          
+        query_llama_fn=query_llama,                 
+        dict_data=dict_data,                        
+        config={                                    
+            "OLLAMA_URL": OLLAMA_URL,
+            "EMBED_MODEL": EMBED_MODEL,
+            "CHROMA_HOST": CHROMA_HOST,
+            "CHROMA_PORT": CHROMA_PORT,
+            "COLLECTION_NAME": COLLECTION_NAME,
+            "FM_MODEL": FM_MODEL,
+            "MAX_RESULTS": MAX_RESULTS,
+            "temperature": temperature,
+            "max_tokens": max_tokens
+        }
+    )
 
-            column = int(q_template["column"])
-            # logging.info(f"column:{column}")
-            
-            row = int(q_template["row"]) if "row" in q_template else None
-            # logging.info(f"row:{row}")
-
-            repeat = q_template["repeat"] if "repeat" in q_template else False
-            dictionary_element = q_template["dictionary_element"]
-            document_id = q_template["document_id"]
-            prompt_template = q_template["prompt_template"]
-
-            q_max_results = q_template.get("max_results")
-            MAX_RESULTS = int(q_max_results) if q_max_results else MAX_RESULTS
-            
-            response = query_llama(question_text, document_id, prompt_template, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens)
-            #response = "0719004306_IFU, Not found, 04-DEC-2024"
-            #logging.info(f"llama response: {response}")
-            
-            if not response:
-                continue
-
-            if isinstance(response, str):
-                try:
-                    parsed = ast.literal_eval(response.strip())
-                    response = parsed
-                except Exception:
-                    pass  # keep as original string if not parsable
-
-            # Case 2: Normalize
-            if isinstance(response, list):
-                response = response
-            elif isinstance(response, str):
-                response = response.strip()
-            else:
-                response = ""
-            try:
-            # Now check type and call form_dict_input accordingly
-                form_dict_input(dictionary_element, response, column, row, repeat)
-                
-            except Exception as e:
-                logging.info(f"Error at dictionary element {dictionary_element}, question text {question_text}: {e}")
-                continue
-
-    except Exception as e:
-        logging.info(f"Error to process input template: {e}")
-
-            
-    logging.info(f"dict data:{json.dumps(dict_data, indent=2)}")
-    
-    
     #logging.info(f"priority:{priority_list}")
 
     for item in priority_list:

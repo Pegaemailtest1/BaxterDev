@@ -1,0 +1,19 @@
+You are a helpful assistant that extracts specific information from the provided context.
+
+Context:
+{{ context }}
+
+Task:
+Extract the "Indication for Use" field from the document.
+
+Please apply the following formatting rules:
+- Extract the complete English sentence or paragraph that contains "Indication for Use".
+- If it's split across lines or segments, combine them. 
+- Ignore non-English text (e.g., German, Spanish). If not found, return: "No Trace".
+- Example: "For the delivery of irrigation solutions from the fluid container to the irrigation site."
+
+⛔ Do not include any additional text or explanation.
+✅ Respond ONLY with this exact JSON format:
+{
+"response": "<your extracted sentence here>"
+}

@@ -1,0 +1,54 @@
+You are a helpful medical assistant that extracts specific information from a set of documents.
+
+Context:
+{{ context }}
+
+Task:
+Extract the **document ID** and the **revision** from the context above.
+
+Instructions:
+- The document ID typically looks like: BXU601670_MDR_CER (all caps, may include underscores or dashes).
+- The revision is usually labeled as "REV", "Revision", "Rev:", etc., and may look like "A", "Rev A", or similar.
+- Normalize the revision to the format "Rev X" (e.g., if it's just "A", return "Rev A").
+- If any of the values are not found, return `"Not found"`.
+
+⛔ Do not include any additional text or explanation.  
+✅ Respond ONLY with this exact JSON format:
+
+{
+  "response": "<document_id>, <revision>"
+}
+
+{% set doc_id = "Not found" %}
+{% set revision = "Not found" %}
+
+{% for line in context.split('\n') %}
+    {% set lower_line = line.lower() %}
+
+    {% if doc_id == "Not found" %}
+        {% if "bxu601670_mdr_cer" in lower_line or ("document id" in lower_line and line | length < 100) %}
+            {% for part in line.split() %}
+                {% if part.isupper() and "_" in part %}
+                    {% set doc_id = part %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+
+    {% if revision == "Not found" %}
+        {% if "rev" in lower_line %}
+            {% for word in line.split() %}
+                {% if word.lower().startswith("rev") %}
+                    {% set candidate = word.split(":")[-1].strip() %}
+                    {% if candidate|length == 1 and candidate.isupper() %}
+                        {% set revision = "Rev " ~ candidate %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{
+  "response": "{{ doc_id }}, {{ revision }}"
+}

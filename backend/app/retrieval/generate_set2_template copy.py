@@ -1,5 +1,5 @@
 import openpyxl
-from .default_questions import questions, priority # Your function that returns question templates
+from questions.question_loader import questions, priority # Your function that returns question templates
 from .retrieve_content_template import retrieve_collection_data_template
 import json
 import logging
@@ -21,7 +21,7 @@ logging.basicConfig(
 
 dict_data = defaultdict(list)
 
-def query_llama(question, document_id, prompt_template, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens):
+def query_llama(question, document_id, prompt_template, full_document_search, where_filter, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens):
     
     llama_response =retrieve_collection_data_template(
         CHROMA_HOST,
@@ -31,6 +31,8 @@ def query_llama(question, document_id, prompt_template, OLLAMA_URL, EMBED_MODEL,
         question,
         document_id,
         prompt_template,
+        full_document_search,
+        where_filter,
         MAX_RESULTS,
         FM_MODEL,
         OLLAMA_URL,
@@ -122,7 +124,7 @@ def apply_styles_by_first_column_match(input_template_path, output_file_path, st
     output_wb.save(output_file_path)
 
 
-def form_dict_input(input_type, input_value, column, row, repeat):
+def form_dict_input(input_type, input_value, column, row, repeat, q_type):
     if isinstance(input_value, list):
         for item in input_value:
             if item.strip().lower() == "no trace":
@@ -155,7 +157,7 @@ def form_dict_input(input_type, input_value, column, row, repeat):
     else:
         print(f"Unsupported data type for {input_type}: {type(input_value)}")
 
-def generate_output_template(input_file_path, output_file_path, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens):
+def generate_set2_template(input_file_path, output_file_path, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens):
     # Set InMemoryCache as the global LLM cache
     set_llm_cache(InMemoryCache())
 
@@ -189,11 +191,14 @@ def generate_output_template(input_file_path, output_file_path, OLLAMA_URL, EMBE
             dictionary_element = q_template["dictionary_element"]
             document_id = q_template["document_id"]
             prompt_template = q_template["prompt_template"]
+            full_document_search = q_template["full_document_search"]
+            where_filter = q_template["where_filter"]
+            q_type = q_template["type"]
 
             q_max_results = q_template.get("max_results")
             MAX_RESULTS = int(q_max_results) if q_max_results else MAX_RESULTS
             
-            response = query_llama(question_text, document_id, prompt_template, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens)
+            response = query_llama(question_text, document_id, prompt_template, full_document_search, where_filter, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,temperature, max_tokens)
             #response = "0719004306_IFU, Not found, 04-DEC-2024"
             #logging.info(f"llama response: {response}")
             
@@ -216,7 +221,7 @@ def generate_output_template(input_file_path, output_file_path, OLLAMA_URL, EMBE
                 response = ""
             try:
             # Now check type and call form_dict_input accordingly
-                form_dict_input(dictionary_element, response, column, row, repeat)
+                form_dict_input(dictionary_element, response, column, row, repeat, q_type)
                 
             except Exception as e:
                 logging.info(f"Error at dictionary element {dictionary_element}, question text {question_text}: {e}")

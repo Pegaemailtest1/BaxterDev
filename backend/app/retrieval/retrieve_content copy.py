@@ -114,15 +114,6 @@ def ocr_from_vector_path(vector_path, width=600, height=200, scale=1):
         draw.rectangle([x, y, x + scale - 1, y + scale - 1], fill=0)
     return pytesseract.image_to_string(img).strip()
 
-def normalize_table_chunk(raw_text):
-    lines = raw_text.strip().split("\n")
-    normalized_lines = []
-    for line in lines:
-        cols = [col.strip() for col in line.split("|")]
-        if len(cols) >= 2:
-            normalized_lines.append(f"{cols[0]} | {cols[1]}")
-    return "\n".join(normalized_lines)
-    
 def retrieve_collection_data(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME, EMBED_MODEL, query_text, max_results, FM_MODEL, OLLAMA_URL, temperature, max_tokens):
     client = connect_chromadb(CHROMA_HOST, CHROMA_PORT)
     collection = get_chromadb_collection(client, COLLECTION_NAME)
@@ -130,66 +121,72 @@ def retrieve_collection_data(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME, EMBED_MO
     extracted_components = extract_components(query_text)
     collection_filter = extracted_components.get("section")
     question = extracted_components.get("question")
-    field = extracted_components.get("field")
-    #logging.info(f"field: {field}")
     question_text = question + "." if question else query_text
 
     query_embedding = embed_with_ollama(question_text, OLLAMA_URL, EMBED_MODEL)
 
     filter_values = collection_filter if isinstance(collection_filter, list) else [collection_filter] if collection_filter else None
+
+    if filter_values:
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=max_results,
+            include=["documents", "metadatas"],
+            where={"section": {"$in": filter_values}}
+        )
+    else:
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=max_results,
+            include=["documents", "metadatas"]
+        )
+
+    documents = results["documents"][0]
+    metadatas = results["metadatas"][0]
+    logging.info(f"documents:{documents}")
+    logging.info(f"metadatas:{metadatas}")
     target_doc_id = extracted_components.get("document_id")
-    logging.info(f"Target document id: {target_doc_id}")
 
-    # Filter by section if provided
-    meta_filter = {}
-    if field:
-        meta_filter["section"] = {"$contains": field}
-    if target_doc_id:
-        meta_filter["source"] = {"$contains": target_doc_id}
+    all_chunks = []
+    for doc, meta in zip(documents, metadatas):
+        doc_type = meta.get("type", "section")
+        logging.info(f"Processing document type: {doc_type}")
+        if target_doc_id and target_doc_id not in (meta.get("source", "") or ""):
+            continue
 
-    # Step 1: Get using one filter (e.g., by source)
-    results = collection.get(
-        include=["documents", "metadatas"],
-        where={
-            "$and": [
-                {"document_id": {"$eq": "BXU601670_MDR_CER,A"}},
-                {"type": {"$eq": "table"}}
-            ]
-        }
-    )
+        if doc_type == "image":
+            base64_data = extract_image_base64(doc)
+            vector_path = meta.get("vector_path")
+            ocr_texts = []
 
-    # Step 2: Apply additional filtering (e.g., exclude a specific section)
-    # filtered_docs = []
-    # for doc, meta in zip(results["documents"], results["metadatas"]):
-    #     if meta.get("section") != "Colour Reference:":
-    #         filtered_docs.append((doc, meta))
-    #logging.info(f"Results: {results}")
-    documents = results.get("documents", [[]])
-    metadatas = results.get("metadatas", [[]])
+            if base64_data:
+                text = extract_text_from_base64_image(base64_data)
+                ocr_texts.append(text)
+                logging.info("[OCR] Extracted from base64 image.")
 
+            if vector_path:
+                vector_text = ocr_from_vector_path(vector_path)
+                ocr_texts.append(vector_text)
+                logging.info("[OCR] Extracted from vector path.")
 
-    # logging.info(f"documents:{documents}")
-    # logging.info(f"metadatas:{metadatas}")
-    
+            combined_text = "\n".join(filter(None, ocr_texts))
+            dates = extract_issued_effective_dates(combined_text)
+            all_chunks.append(combined_text)
+            logging.info(f"[Image OCR] Issued: {dates['issued_date']} | Effective: {dates['effective_date']}")
 
-    # Step 6: Filter based on metadata match
-    # filtered_chunks = []
-    filtered_docs = documents
+        elif doc_type == "text+table":
+            if "[Tables]" in doc:
+                text_part, table_part = doc.split("[Tables]", 1)
+                all_chunks.extend([text_part.strip(), table_part.strip()])
+            else:
+                all_chunks.append(doc.strip())
+        else:  # section (text)
+            all_chunks.append(doc.strip())
 
-    logging.info(f"Filtered chunks: {filtered_docs}")
-    # Step 7: Combine into final context
-    context = "\n\n".join(
-        str(chunk).strip() for chunk in filtered_docs if str(chunk).strip()
-    )
+    context = "\n\n".join(all_chunks)
 
-    
-    #logging.info(f"Filtered Query results: {filtered_chunks}")
-    #logging.info(f"context: {context}")
-
+    logging.info(f"Context for Llama3:\n{context}")
     prompt = select_prompt_template(context, query_text)
-
-    logging.info(f"Generated prompt: {prompt}")
-
     llama_response = ask_llama3(prompt, OLLAMA_URL, FM_MODEL, temperature, max_tokens)
 
     return llama_response
