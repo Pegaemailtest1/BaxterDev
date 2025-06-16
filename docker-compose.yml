@@ -37,8 +37,15 @@ services:
     volumes:
       - ollama_data:/root/.ollama
     tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
     environment:
       - OLLAMA_KEEP_ALIVE=24h
+      - NVIDIA_VISIBLE_DEVICES=all
+    runtime: nvidia  # Required for GPU usage
     
   flask:
     build:
