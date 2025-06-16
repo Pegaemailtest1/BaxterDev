@@ -14,6 +14,8 @@ from documents_ingestion.remove_empty_folders import remove_empty_folders
 from documents_ingestion.delete_collection import delete_collection
 from retrieval.retrieve_content import retrieve_collection_data
 from retrieval.generate_output_template import generate_output_template
+from retrieval.generate_set2_template import generate_set2_template
+from retrieval.generate_set3_template import generate_set3_template
 from retrieval.retrieve_content_prompt import retrieve_collection_data_prompt
 
 from utils import load_constants
@@ -97,20 +99,34 @@ def file_vectorization(request: FolderPathRequest):
     folder_path = request.folder_path
     logging.info(f"folder_path:{folder_path}")
     
-    #delete_collection(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME)
+    delete_collection(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME)
     #logging.info(f"Collection deleted successfully")
     
     documents = load_documents(folder_path)    
     #logging.info(f"Documents loaded successfully: {documents}")
 
     chunks = generate_all_chunks(documents)
-    #logging.info(f"Split documents successfully:{chunks}")
+    logging.info(f"Split documents successfully:{chunks}")
 
-    embeddings = embed_section_texts(chunks, OLLAMA_URL, EMBED_MODEL)
+    embeddings, valid_chunks = embed_section_texts(chunks, OLLAMA_URL, EMBED_MODEL)
     #logging.info(f"embedding successfully")
 
-    vectorize_response = document_vectorize_by_section(CHROMA_HOST, CHROMA_PORT, COLLECTION_NAME, chunks, embeddings)
-    logging.info(f"vectorization successfully: {vectorize_response}")
+
+    if not embeddings or not valid_chunks:
+        logging.warning("No valid embeddings or chunks were generated. Skipping vectorization.")
+    else:
+        logging.info(f"Successfully embedded {len(valid_chunks)} chunks")
+
+        # Vectorize only the valid chunks
+        vectorize_response = document_vectorize_by_section(
+            CHROMA_HOST,
+            CHROMA_PORT,
+            COLLECTION_NAME,
+            valid_chunks,  # ✅ Use only valid chunks
+            embeddings
+        )
+
+        logging.info(f"Vectorization successful: {vectorize_response}")
 
     # move files to destination folder
     move_files_to_archive(UPLOAD_FOLDER, ARCHIVE_FOLDER)
@@ -169,14 +185,52 @@ def retrieval_content_from_chromadb_prompt(request: PromptQuery):
 
 @app.get("/download/{filename}")
 def download_file(filename: str):
+    logging.info(f"Download started for: {filename}")
+
+    input_file_path = os.path.join(INPUT_TEMPLATE_FOLDER, filename)
+    output_file_path = os.path.join(DOWNLOAD_TEMPLATE_FOLDER, filename)
+
+    os.makedirs(DOWNLOAD_TEMPLATE_FOLDER, exist_ok=True)
+
+    try:
+        if "Set III" in filename:
+            logging.info("Using Set III generation logic")
+            generate_set3_template(
+                input_file_path, output_file_path,
+                OLLAMA_URL, EMBED_MODEL, CHROMA_HOST, CHROMA_PORT,
+                COLLECTION_NAME, FM_MODEL, MAX_RESULTS, TEMPERATURE, MAX_TOKENS
+            )
+        elif "Set II" in filename:
+            logging.info("Using Set II generation logic")
+            generate_set2_template(
+                input_file_path, output_file_path,
+                OLLAMA_URL, EMBED_MODEL, CHROMA_HOST, CHROMA_PORT,
+                COLLECTION_NAME, FM_MODEL, MAX_RESULTS, TEMPERATURE, MAX_TOKENS
+            )
+        else:
+            logging.warning("No matching Set found in filename, using default")
+            generate_output_template(
+                input_file_path, output_file_path,
+                OLLAMA_URL, EMBED_MODEL, CHROMA_HOST, CHROMA_PORT,
+                COLLECTION_NAME, FM_MODEL, MAX_RESULTS, TEMPERATURE, MAX_TOKENS
+            )
+
+    except Exception as e:
+        logging.error(f"Template generation failed: {e}")
+        return {"error": str(e)}
+
+    if os.path.exists(output_file_path):
+        return FileResponse(output_file_path, filename=filename, media_type='application/octet-stream')
+
+    return {"error": "File not found"}
+
+
+
+@app.get("/downloaded_file/{filename}")
+def downloaded_file(filename: str):
 
     logging.info(f"Download started")
-    input_file_path = os.path.join(INPUT_TEMPLATE_FOLDER, filename)
-    #Generate output template
-    os.makedirs(os.path.dirname(DOWNLOAD_TEMPLATE_FOLDER), exist_ok=True)
-    file_path = os.path.join(DOWNLOAD_TEMPLATE_FOLDER, filename)
-    generate_output_template(input_file_path, file_path, OLLAMA_URL, EMBED_MODEL,CHROMA_HOST,CHROMA_PORT,COLLECTION_NAME,FM_MODEL,MAX_RESULTS,TEMPERATURE, MAX_TOKENS)
-    #file_path = os.path.join(INPUT_TEMPLATE_FOLDER, filename)
-    if os.path.exists(file_path):
-        return FileResponse(file_path, filename=filename, media_type='application/octet-stream')
+    input_file_path = os.path.join(DOWNLOAD_TEMPLATE_FOLDER, filename)
+    if os.path.exists(input_file_path):
+        return FileResponse(input_file_path, filename=filename, media_type='application/octet-stream')
     return {"error": "File not found"}
