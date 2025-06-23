@@ -49,6 +49,8 @@ def overview():
 
 @app.route('/reports')
 def reports():
+    os.makedirs(UPLOAD_INPUT_TEMPLATE_FOLDER, exist_ok=True)
+    os.makedirs(DOWNLOAD_TEMPLATE_FOLDER, exist_ok=True)
     input_files = os.listdir(UPLOAD_INPUT_TEMPLATE_FOLDER)
     output_files = os.listdir(DOWNLOAD_TEMPLATE_FOLDER)
     
