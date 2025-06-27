@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}" />
+</head>
+
+<body>
+
+  <header class="header-container">
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('overview') }}">Overview</a></li> 
+        <li><a href="{{ url_for('upload') }}">Upload</a></li>
+        <li><a href="{{ url_for('reports') }}">Reports</a></li>
+        <li><a href="{{ url_for('chatbot') }}">Chat</a></li>
+      </ul>
+    </nav>
+  </header>
+
+
+  <div class="container">
+    <div class="chat-box">
+      <div class="card">
+        <button class="menu-button" onclick="toggleMenu()">⋮</button>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="{{ url_for('prompt_template') }}">Prompt Template</a>
+        </div>
+      </div>
+      <h2>Chat With Us</h2>
+      <div class="chat-window" id="chat-window"></div>
+      <form id="chat-form">
+        <input type="text" id="chat-input" placeholder="Type a message..." required />
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const chatWindow = document.getElementById('chat-window');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userMsg = input.value.trim();
+      if (userMsg !== '') {
+        appendBubble(userMsg, 'user');
+        input.value = '';  
+
+        try {
+          const response = await fetch('{{ url_for("chat") }}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'user_query': userMsg }),
+          });
+
+          const data = await response.json();
+          const botMessage = data.response || "Sorry, I couldn't understand that.";
+          appendBubble(botMessage, 'bot');
+        } catch (error) {
+          console.error('Error:', error);
+          appendBubble("Sorry, there was an error. Please try again later.", 'bot');
+        }
+      }
+    });
+
+    function appendBubble(message, type) {
+      const bubble = document.createElement('div');
+      bubble.className = type === 'user' ? 'chat-bubble user' : 'chat-bubble bot';
+      bubble.textContent = message;
+      chatWindow.appendChild(bubble);
+      chatWindow.scrollTop = chatWindow.scrollHeight;  
+    }
+  </script>
+  <script>
+  function toggleMenu() {
+    const menu = document.getElementById('dropdownMenu');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+  }
+
+  // Optional: Close menu when clicking outside
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('dropdownMenu');
+    const button = document.querySelector('.menu-button');
+    if (!button.contains(e.target) && !menu.contains(e.target)) {
+      menu.style.display = 'none';
+    }
+  });
+</script>
+  <footer id="contact">
+    <p>Privacy Policy | Terms & Conditions | 2025 AIRA DHF Portal</p>
+  </footer>
+
+</body>
+</html>
