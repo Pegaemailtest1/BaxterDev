@@ -1,0 +1,88 @@
+services:
+  fastapi:
+    build:
+      context: ./backend/app
+      dockerfile: Dockerfile
+    container_name: rag_fastapi
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/app:/app
+      - shared_volume:/app/shared_data
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    depends_on:
+      - chromadb
+      - ollama
+    environment:
+      - CHROMADB_HOST=chromadb
+      - CHROMADB_PORT=8000
+      - OLLAMA_HOST=ollama
+      - OLLAMA_PORT=11434
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=airadb
+      - DB_USER=airauser
+      - DB_PASSWORD=Password123
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - NVIDIA_VISIBLE_DEVICES=all
+    runtime: nvidia  # Required for GPU usage
+    
+  flask:
+    build:
+      context: ./frontend/app
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend/app:/app
+      - shared_volume:/app/shared_data
+    container_name: flask_app
+    ports:
+      - "5000:5000"
+    environment:
+    - FLASK_APP=app.py
+    - FLASK_ENV=development
+    command: flask run --host=0.0.0.0 --port=5000
+    depends_on:
+      - fastapi
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: airadb
+      POSTGRES_USER: airauser
+      POSTGRES_PASSWORD: Password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  chroma_data:
+  ollama_data:
+  shared_volume:
+  postgres_data:
+ 
