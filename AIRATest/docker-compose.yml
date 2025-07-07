@@ -1,0 +1,15 @@
+services:
+  nginx-gpu:
+    build: .
+      
+    ports:
+      - "80:80"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
