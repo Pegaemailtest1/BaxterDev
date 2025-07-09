@@ -1,0 +1,319 @@
+SYS req:
+
+Prompt: Extract only the medical warnings from the document.
+ A medical warning is any requirement that explicitly alerts to:
+ Sterility, Biocompatibility, Contamination control, Material safety (e.g., latex-free, DEHP limit), 
+Compliance with ISO or similar safety standards when linked to safety hazards Include only structured requirement
+ statements (e.g., MAC-SYR.###) that meet these criteria. If the requirement ID (e.g., MAC-SYR.70) and
+ the warning text (e.g., “The tubing…”) appear in separate columns, rows, or fields, combine them into a single
+ line joined by a hyphen and a space (e.g., “MAC-SYR.70 - The tubing…”). Preserve all IDs and warning text
+ exactly as written. Combine multiple requirements under one ID if they appear together.
+ Do not paraphrase, interpret, or include usability, labeling, or ergonomic notes unless they warn of safety
+ or sterility risks. If no valid warnings are found, respond with No Trace.
+
+Question:Extract the medical warnings from the BXU535427 Rev D_Design Input - Requirements document.
+
+
+Actual answer:MAC-SYR.70 - The tubing of the set shall be transparent or sufficiently translucent as to allow visual detection of air bubbles inside the fluid path.
+--------------------------------------------------------------------------------------------------------
+RMP:
+
+Prompt:Extract only the medical warnings stated in the document. A “medical warning” is defined as any explicit statement regarding risks or hazards associated with the product’s sterility, biocompatibility, contamination control, material safety (e.g., latex-free, DEHP limit), or compliance with ISO or similar safety standards that relate to potential harm or clinical hazard.
+Exclude any statements about intended use, user instructions, claims, general handling practices, or standard precautions unless they explicitly alert to a safety concern or hazard prevention measure.
+List each warning verbatim as a bullet point, without paraphrasing or summarizing. If no qualifying medical warnings are found, respond with No Trace. Do not include extra explanation or metadata.
+
+question:Extract the medical claims from the 1266804_Rev B_RMP Irrigation Sets document.
+
+Output: No Trace
+Actual Answer: No Trace.
+-----------------------------------------------------------------------------------------------------
+HAZOP:
+
+Prompt:Extract only the medical warnings stated in the document. A “medical warning” is defined as any explicit statement that alerts to a safety-related risk involving the product’s sterility, biocompatibility, contamination control, material safety (e.g., latex-free, DEHP limit), or compliance with ISO or similar safety standards directly linked to hazard prevention or patient/user harm.
+Exclude any statements about intended use, user instructions, claims, material compatibility, or regulatory handling unless they explicitly identify a safety risk or clinical hazard. List each warning verbatim as a bullet point, without paraphrasing or summarizing. If no qualifying medical warnings are found, respond with No Trace. Do not include extra explanation or metadata.
+
+question:Extract the medical claims from the 1277545 Rev F_HAZOP_Irrigation Sets document.
+Output: No Trace.
+
+Actual Answer: Reinforce Hospital Policy to double check solution before pressurization
+Direction insert and/or primary label indicates recommended storage temperature
+--------------------------------------------------------------------------------------------------
+RACT:
+
+Prompt:Extract only the formal medical warnings from the document. A “medical warning” is defined as any exact statement—verbatim or structured—about product sterility, biocompatibility, contamination control, material safety (e.g., latex-free, DEHP limit), or compliance with ISO or similar safety standards that explicitly alert to a potential safety hazard or clinical risk.
+Return only the HS.IRR codes linked to medical warnings, grouped under Design, Use (if present), and Process sections.
+For each section:
+Design must only include requirement IDs like “MIT.1” with formal requirement language (e.g., “shall be,” “shall maintain…”) that directly mitigate safety or sterility risks.
+Process must only list structured process controls that explicitly ensure sterility, safety, or compliance (e.g., “Operator Training and Qualification”, “Raw Material Specification”).
+Use is optional and must follow the same pattern.
+If no qualifying warnings are found, return No Trace. Do not paraphrase, explain, or reword warnings. Do not output descriptive or rationale sentences.
+Use this format strictly:
+HS.IRR.1.1  
+HS.IRR.1.2  
+HS.IRR.1.3  
+HS.IRR.1.4  
+Design  
+MIT.5 - Set shall maintain functionality after sterilization.  
+MIT.6 - Set shall maintain functionality after transportation.  
+MIT.7 - Set shall maintain functionality during Shelf Life.  
+MIT.24 - The set shall have a sufficiently translucent fluid path.  
+MIT.29 - The set shall include the minimum and correct components required to eliminate air particles entrained within the fluid path.  
+MIT.46 - Set shall maintain functionality for the intended period of use.  
+Use  
+MIT.69 - No excessive force required to insert the spike into the container's port.  
+MIT.70 - Where applicable, labelling shall provide instructions to insert spikes into solution containers.  
+MIT.129 - Where applicable, label shall indicate how to prime the set  
+Process  
+• Operator Training and Qualification  
+• Verification of raw materials prior to start-up  
+• In process inspection and pressure testing of bonds  
+
+
+Output: HS.IRR.1.1 HS.IRR.1.2 HS.IRR.1.3 HS.IRR.1.4 HS.IRR.15.8 HS.IRR.15.11 HS.IRR.16.1 HS.IRR.16.2 HS.IRR.2.3 HS.IRR.2.4 HS.IRR.8.7 HS.IRR.8.8 HS.IRR.8.9 HS.IRR.8.10 
+Design MIT.5- Set shall maintain functionality after sterilization.
+ MIT.6 - Set shall maintain functionality after transportation. 
+MIT.7 - Set shall maintain functionality during Shelf Life.
+ MIT.24 - The set shall have a sufficiently translucent fluid path. 
+MIT.29 - The set shall include the minimum and correct components required to eliminate air particles entrained within the fluid path.
+ MIT.46 - Set shall maintain functionality for the intended period of use.
+ MIT.69 - The set shall include materials selected to minimize leachables and extractables.
+ MIT.70 - The set shall be biocompatible per ISO 10993.
+ Process • Operator Training and Qualification
+ • Verification of raw materials prior to start-up
+ • In process inspection and pressure testing of bonds 
+• Environmental monitoring for particulate matter
+ • Validation of sterilization processes 
+• Inspection of packaging integrity
+ Use MIT.129 - Where applicable, label shall indicate how to prime the set. 
+MIT.130 - Labelling shall include instructions to prevent air entrapment.
+
+Actual answer:
+HS.IRR.1.1
+HS.IRR.1.2
+HS.IRR.1.3
+HS.IRR.1.4
+Design
+MIT.5 - Set shall maintain functionality after sterilization.
+MIT.6 - Set shall maintain functionality after transportation.
+MIT.7 - Set shall maintain functionality during Shelf Life.
+MIT.24 - The set shall have a sufficiently translucent fluid path.
+MIT.29 - The set shall include the minimum and correct components required to eliminate air particles entrained within the fluid path.
+MIT.46 - Set shall maintain functionality for the intended period of use.
+Use
+MIT.69 - No excessive force required to insert the spike into the container's port.
+MIT.70 - Where applicable, labelling shall provide instructions to insert spikes into solution containers.
+MIT.129 - Where applicable, label shall indicate how to prime the set
+Process
+• Operator Training and Qualification
+• Verification of raw materials prior to start-up
+• In process inspection and pressure testing of bonds 
+HS.IRR.13.1
+HS.IRR.13.2
+HS.IRR.13.3
+HS.IRR.13.4
+Design
+MIT.3 - Set shall be designed to minimize generation of visible particulate matter during production.
+MIT.4 - Set shall meet applicable standards controlling the particulate matter generation.
+MIT.5 - Set shall maintain functionality after sterilization.
+MIT.6 - Set shall maintain functionality after transportation.
+MIT.7 - Set shall maintain functionality during Shelf Life.
+MIT.24 - The set shall have a sufficiently translucent fluid path.
+MIT.29 - The set shall include the minimum and correct components required to eliminate air particles entrained within the fluid path.
+MIT.37 - The set shall include the minimum and correct components required to shut off the flow.
+MIT.46 - Set shall maintain functionality for the intended period of use.
+
+HS.IRR.4.1
+HS.IRR.4.2
+HS.IRR.4.3
+HS.IRR.4.4
+Design
+MIT.3 - Set shall be designed to minimize generation of visible particulate matter during production.
+MIT.4 - Set shall meet applicable standards controlling the particulate matter generation.
+MIT.5 - Set shall maintain functionality after sterilization.
+MIT.6 - Set shall maintain functionality after transportation.
+MIT.7 - Set shall maintain functionality during Shelf Life.
+MIT.19 - The set shall include the minimum and correct components required to deliver irrigation solution to urinary drainage catheter and/or surgical scope.
+MIT.37 - The set shall include the minimum and correct components required to shut off the flow.
+MIT.38 - Labels shall reflect applicable standards.
+MIT.39 - Labels shall reflect applicable Baxter requirements.
+MIT.43 - Packaging shall act as a sterile barrier.
+MIT.45 - Protective caps and/or Air vents shall act as a sterile barrier.
+MIT.46 - Set shall maintain functionality for the intended period of use.
+MIT.49 - Set is individually packed
+MIT.50 - Packaging of the set is sealed in a tamper evident manner
+MIT.143 - The set shall be ergonomically easy to use.
+MIT.144 - The paper band retains set in a coiled position
+MIT.54 - Sets in primary packaging shall be packed in a carton box for additional protection
+Use
+MIT.52 - Sets are shipped in a carton of standard size and shape to facilitate transport and stacking
+MIT.53 - Where applicable, labeling shall indicate storage and handling conditions
+MIT.57 - Clear bottom web on primary packaging for product visibility
+MIT.58 - Product is required to have legible label
+MIT.127 - If applicable, the set shall not be colored using the same convention as another therapy.
+MIT.59 - Primary packaging shall indicate correct location from where to open the package
+MIT.61 - No excessive force required to open primary packaging
+MIT.63 - No excessive force required to remove paper band/sleeve
+MIT.69 - No excessive force required to insert the spike into the container's port
+MIT.103 - Where applicable, labeling shall provide notes to close clamp below filter when set is not in use.
+MIT.143 - The set shall be ergonomically easy to use.
+Process
+• Operator Training and Qualification
+• Verification of raw materials prior to start-up
+• In process inspection and pressure testing of bonds
+HS.IRR.4.1
+HS.IRR.4.2
+HS.IRR.4.3
+HS.IRR.4.4
+ 
+Design
+MIT.3 - Set shall be designed to minimize generation of visible particulate matter during production.
+MIT.4 - Set shall meet applicable standards controlling the particulate matter generation.
+MIT.5 - Set shall maintain functionality after sterilization.
+MIT.6 - Set shall maintain functionality after transportation.
+MIT.7 - Set shall maintain functionality during Shelf Life.
+MIT.19 - The set shall include the minimum and correct components required to deliver irrigation solution to urinary drainage catheter and/or surgical scope.
+MIT.37 - The set shall include the minimum and correct components required to shut off the flow.
+MIT.38 - Labels shall reflect applicable standards.
+MIT.39 - Labels shall reflect applicable Baxter requirements.
+MIT.43 - Packaging shall act as a sterile barrier.
+MIT.45 - Protective caps and/or Air vents shall act as a sterile barrier.
+MIT.46 - Set shall maintain functionality for the intended period of use.
+MIT.49 - Set is individually packed
+MIT.50 - Packaging of the set is sealed in a tamper evident manner
+MIT.143 - The set shall be ergonomically easy to use.
+MIT.144 - The paper band retains set in a coiled position
+MIT.54 - Sets in primary packaging shall be packed in a carton box for additional protection
+ 
+Use
+MIT.52 - Sets are shipped in a carton of standard size and shape to facilitate transport and stacking
+MIT.53 - Where applicable, labeling shall indicate storage and handling conditions
+MIT.57 - Clear bottom web on primary packaging for product visibility
+MIT.58 - Product is required to have legible label
+MIT.127 - If applicable, the set shall not be colored using the same convention as another therapy.
+MIT.59 - Primary packaging shall indicate correct location from where to open the package
+MIT.61 - No excessive force required to open primary packaging
+MIT.63 - No excessive force required to remove paper band/sleeve
+MIT.69 - No excessive force required to insert the spike into the container's port
+MIT.103 - Where applicable, labeling shall provide notes to close clamp below filter when set is not in use.
+MIT.143 - The set shall be ergonomically easy to use.
+ 
+Process
+• Operator Training and Qualification
+• Verification of raw materials prior to start-up
+• In process inspection and pressure testing of bonds 
+------------------------------------------------------------------------------------------------------------------------------------
+RBA
+
+Prompt: Extract only the explicit medical warnings from the document. A “medical warning” is any verbatim statement that directly alerts to risks involving the product’s sterility, biocompatibility, contamination control, material safety (e.g., latex-free, DEHP limit), or compliance with ISO or similar safety standards that relate to hazard prevention or patient/user safety.
+Strictly exclude: Any inferred warnings, general safety discussions, or statements about risk monitoring or management processes. Any text about intended use, procedural steps, value justifications, or general operational performance. Any paraphrased or non-verbatim content.
+Only return direct quotes from the document that meet the above. If no such warnings are found respond with: No Trace Do not include any explanations, headers, or extra formatting.
+
+Question: Extract the medical warnings from the 1277308 Rev C RBA_Irrigation Sets document.
+
+Output: No Trace
+
+Actual answer: No Trace
+---------------------------------------------------------------------------------------------------------------------------------------------
+Design validation
+
+Prompt:Extract only the medical warnings stated in the document. A “medical warning” is defined as any explicit statement that alerts to risks involving the product’s sterility, biocompatibility, contamination control, material safety (e.g., latex-free, DEHP limit), or compliance with ISO or similar safety standards directly related to hazard prevention or patient/user safety.
+Exclude any statements about intended use, user instructions, medical claims, material compatibility, or regulatory labeling unless they explicitly identify a risk or safety hazard. List each warning verbatim as a bullet point, without paraphrasing or summarizing. If no qualifying medical warnings are found, respond with No Trace. Do not include extra explanation or metadata.
+
+Question: Extract the medical warnings from the BXU542980 Rev A – Attachment 1_Design Validation Irrigation Sets document.
+
+Output: No Trace.
+
+Actual answer: MAC-UNIU.12: Requirement is validated through the Design Validation Study on similar product where this requirement was specifically evaluated.
+Validation Study: 
+-  63129 (validated UNIU PR1079).
+MAC-UNIU.148:If through the design validation it can be concluded that the user can make use of the product (independent of time), the capability of the set to maintain integrity over intended period of use is evaluated through design verification, and does not require further validation.
+-------------------------------------------------------------------------------------------------------------------------------------------------
+Tracematrix sys req
+
+Prompt:Extract only the medical warnings from the document. A “medical warning” is a requirement that explicitly alerts to risks involving sterility, biocompatibility, contamination control, material safety (e.g., latex-free, DEHP limit), or compliance with medical safety standards (e.g., ISO 10993, EN 556-1) that are directly linked to hazard prevention or patient/user safety.
+Return only warnings where:
+The requirement ID (e.g., MAC-SYR.5) appears in the same row as a non-empty verification field (e.g., BXU537931, Section 3.1),
+And the requirement text clearly identifies a safety, sterility, or compliance-related hazard or mitigation.
+Format: MAC-SYR.XXX is verified in [verification details]
+Do not include rows with empty or placeholder verification data. Do not paraphrase, explain, or summarize. If no valid warnings are found, return: No Trace
+
+Question:Extract the medical warnings from the BXU542284 Rev F_Verification Trace Matrix Irrigation Sets document.
+
+
+
+actual answer:MAC-SYR.5 is verified in BXU537931,
+Section 3.1
+
+----------------------------------------------------------------------------------------------------------------------------------
+Tracematrix- Labeling:
+
+Prompt:Extract only the medical warnings stated in the document. A “medical warning” is defined as any explicit statement that alerts to risks involving the product’s sterility, biocompatibility, contamination control, material safety (e.g., latex-free, DEHP limit), or compliance with ISO or similar safety standards directly related to hazard prevention or user/patient safety.
+Exclude any statements about intended use, user instructions, medical claims, general material specifications, or regulatory labeling unless they explicitly identify a risk or safety hazard. List each warning verbatim as a bullet point, without paraphrasing or summarizing. If no qualifying medical warnings are found, respond with No Trace. Do not include extra explanation or metadata.
+
+Question:
+
+Actual Answer: No Trace
+---------------------------------------------------------------------------------------------------------------------------------------
+Updatedddd
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CER
+
+Prompt:Extract all medical warnings, usage restrictions, and storage or disposal instructions stated in this document. A medical warning includes any statement related to clinical safety, such as device replacement intervals, temperature storage conditions, disposal procedures, and declarations of whether warnings apply. List each one as a bullet point, without paraphrasing or summarizing. Include statements like ‘no warnings applicable’ as well.
+
+Question:Extract the medical warnings from the BXU601670_MDR_CER,A Irrigation Sets document.
+
+output:```json { "medical_warnings": [ "Do not use if package has been opened or damaged or if tip protectors are loose or missing.", "The set can be used under pressure to assist flow (max. 300mmHg).", "Do not allow air to be trapped in set.", "Do not remove from pouch until ready to use.", "Reuse or reprocessing of a single use device may lead to contamination and compromised device function or structural integrity.", "Single use only. Do not resterilize.", "Not I.V. compatible.", "All incidents should be reported to the manufacturer as identified on the label. In case of incidents involving death or serious injury report them to the competent authority as well.", "Store at room temperature.", "Replace set every 72 hours or as per institutional protocol, whichever comes first.", "Dispose as per healthcare provider’s policy.", "The fluid path of this product contains ABS and PVC. Ensure that the drug is compatible with these materials.", "This product is not manufactured with natural rubber latex.", "Contains less than 0.1% w/w DEHP.", "Do not use if package is damaged and consult instructions for use.", "Do Not Reuse.", "Do Not Resterilize.", "Keep dry.", "Keep away from Sunlight.", "Store at room temperature.", "Use-by date.", "Sterilized with Ethylene Oxide Single Sterile Barrier System.", "Indicates the entity importing the medical device into the locale.", "MR safe - Poses no known hazards resulting from exposure to any MR environment." ] } ```
+
+Expected Output:
+There are no warnings applicable to the use of this device.
+Store at room temperature
+Set to be replaced every 72 hours or as per institutional protocol, whichever comes first.
+Dispose as per healthcare provider’s policy.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+IFU (0719004306)
+
+Prompt:
+
+Task:
+Read the following document carefully. Identify and extract all medical warnings explicitly stated in the text.
+
+Definition of Medical Warning:
+A medical warning is any statement that alerts to clinical risks, potential safety hazards, or health-related consequences. These include, but are not limited to:
+
+Sterility and re-sterilization alerts
+
+Reuse and contamination risks
+
+Biocompatibility or material safety (e.g., latex-free, DEHP content)
+
+Warnings related to use under specific conditions (temperature, environment, pressure, etc.)
+
+Statements indicating compliance with ISO or safety standards
+
+Device replacement intervals or storage/disposal risks
+
+Instructions:
+For each medical warning you extract, provide the following:
+
+Warning Text: The exact sentence or phrase from the document.
+
+Ignore: General wellness messages, marketing claims, or vague safety guidance unless they imply a specific clinical risk or safety decision.
+
+Question : Extract the medical warnings from the RMC4916_0719004306_IFU_LABEL Irrigation Sets Document
+
+
+Output: { "medical_warnings": [ "Store at room temperature.", "Replace set every 72 hours or as per institutional protocol,
+ whichever comes first.", "The fluid path of this product contains ABS and PVC. Ensure that the drug is compatible with these materials.", 
+"This product is not manufactured with natural rubber latex.", "Contains less than 0.1% w/w DEHP." ] } 
+
+
+Expected:
+
+Fully prime the set to remove all air bubbles from set prior to use
+Store at room temperature
+Replace set every 72 hours or as per institutional protocol, whichever comes first.
+Dispose as per healthcare provider’s policy.
+
+--------------------------------------------------------------------------------------------------------------------
+
